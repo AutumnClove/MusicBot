@@ -72,6 +72,9 @@ class Config:
         self.leavenonowners = config.getboolean('MusicBot', 'LeaveServersWithoutOwner', fallback=ConfigDefaults.leavenonowners)
         self.usealias = config.getboolean('MusicBot', 'UseAlias', fallback=ConfigDefaults.usealias)
         self.dmhelp = config.getboolean('MusicBot', 'DMHelp', fallback=ConfigDefaults.dmhelp)
+        self.status = config.get('MusicBot', 'Status', fallback=ConfigDefaults.status)
+        self.activitystatus = config.get('MusicBot', 'ActivityStatus', fallback=ConfigDefaults.activitystatus)
+        self.streamer = config.get('MusicBot', 'Streamer', fallback=ConfigDefaults.streamer) 
 
         self.debug_level = config.get('MusicBot', 'DebugLevel', fallback=ConfigDefaults.debug_level)
         self.debug_level_str = self.debug_level
@@ -342,6 +345,9 @@ class ConfigDefaults:
     leavenonowners = False
     usealias = True
     dmhelp = True
+    status = 'online'
+    activitystatus = '0'
+    streamer = 'https://www.twitch.tv/'
 
     options_file = 'config/options.ini'
     blacklist_file = 'config/blacklist.txt'
