@@ -1069,6 +1069,7 @@ class MusicBot(discord.Client):
             log.info("  Status: " + self.config.status)
             if self.config.activitystatus == 1:
                 log.info(" Twitch.tv url: " + self.config.streamer)
+            log.info("  Direct message help: " + ['Disabled', 'Enabled'][self.config.dmhelp])
 
         print(flush=True)
 
@@ -1150,6 +1151,7 @@ class MusicBot(discord.Client):
 
         if self.config.dmhelp:
             await self.safe_send_message(message.author, desc, expire_in=60)
+            return Response(":mailbox_with_mail:", reply=False, expire_in=15)
         else:
             return Response(desc, reply=True, delete_after=60)
 
