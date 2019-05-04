@@ -1083,7 +1083,8 @@ class MusicBot(discord.Client):
             log.info("  Embeds: " + ['Disabled', 'Enabled'][self.config.embeds])
             log.info("  Spotify integration: " + ['Disabled', 'Enabled'][self.config._spotify])
             log.info("  Legacy skip: " + ['Disabled', 'Enabled'][self.config.legacy_skip])
-            log.info("  Leave non owners: " + ['Disabled', 'Enabled'][self.config.leavenonowners])log.info("  Activity status: " + self.config.activitystatus)
+            log.info("  Leave non owners: " + ['Disabled', 'Enabled'][self.config.leavenonowners])
+            log.info("  Activity status: " + self.config.activitystatus)
             log.info("  Status: " + self.config.status)
             if self.config.activitystatus == 1:
                 log.info(" Twitch.tv url: " + self.config.streamer)
