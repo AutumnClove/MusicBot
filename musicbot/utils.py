@@ -89,7 +89,6 @@ async def lookup_activity(string):
         return discord.ActivityType.watching
     return discord.ActivityType.playing
 
-
 def md5sum(filename, limit=0):
     fhash = md5()
     with open(filename, "rb") as f:
