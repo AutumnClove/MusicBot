@@ -3125,7 +3125,7 @@ class MusicBot(discord.Client):
                     log.info(autopause_msg.format(
                         state = "Unpausing",
                         channel = player.voice_client.channel,
-                        reason = "member undeafen"
+                        reason = "(member undeafen)"
                     ).strip())
 
                     self.server_specific_data[player.voice_client.guild]['auto_paused'] = False
@@ -3147,7 +3147,7 @@ class MusicBot(discord.Client):
                     log.info(autopause_msg.format(
                         state = "Pausing",
                         channel = player.voice_client.channel,
-                        reason = "(empty channel)"
+                        reason = "(empty channel or member deafened)"
                     ).strip())
 
                     self.server_specific_data[player.voice_client.guild]['auto_paused'] = True
