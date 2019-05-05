@@ -1119,6 +1119,10 @@ class MusicBot(discord.Client):
         e.set_author(name=self.user.name, url='https://github.com/Just-Some-Bots/MusicBot', icon_url=self.user.avatar_url)
         return e
 
+    async def cmd_ping(self, channel):
+        """Basic ping command for latency."""
+        return Response(":ping_pong:\n{} ms".format(math.floor(bot.latency * 1000)))
+
     async def cmd_resetplaylist(self, player, channel):
         """
         Usage:
