@@ -2862,7 +2862,7 @@ class MusicBot(discord.Client):
                 await self.safe_send_message(message.channel, 'You cannot use this bot in private messages.')
                 return
 
-        if self.config.bound_channels and message.channel.id not in self.config.bound_channels:
+        if self.config.bound_channels and message.channel.id not in self.config.bound_channels and not isinstance(message.channel, discord.abc.PrivateChannel):
             if self.config.unbound_servers:
                 for channel in message.guild.channels:
                     if channel.id in self.config.bound_channels:
