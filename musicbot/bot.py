@@ -1182,7 +1182,7 @@ class MusicBot(discord.Client):
             if j % 2 != 0:
                 desc += " " + "**" + str(j) + "**" + ". " + "__" + i + "__"
             else:
-                format_line = '{:.<45}'.format("\n" + "**" + str(j) + "**" + ". " + "__" + i + "__")\
+                format_line = '{:.<45}'.format("\n" + "**" + str(j) + "**" + ". " + "__" + i + "__")
                 desc += format_line
             
 
