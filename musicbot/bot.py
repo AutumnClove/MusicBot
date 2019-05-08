@@ -1179,10 +1179,14 @@ class MusicBot(discord.Client):
             await self.gen_cmd_list(message)
 
         for i in self.commands:
-            j = j + 1
-            desc += "\n" + str(j) + ". " + i + "\n"
+            if j % 2 != 0:
+                desc += " " + "**" + str(j) + "**" + ". " + "__" + i + "__"
+            else:
+                format_line = '{:.<45}'.format("\n" + "**" + str(j) + "**" + ". " + "__" + i + "__")\
+                desc += format_line
+            
 
-        desc += '\n' + self.str.get(
+        desc += '\n\n' + self.str.get(
             'cmd-help-response', 'For information about a particular command, run `{}help [command]`\n'
                                  'For further help, see https://just-some-bots.github.io/MusicBot/').format(prefix)
         if not self.is_all:
