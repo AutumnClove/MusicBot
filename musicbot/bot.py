@@ -491,7 +491,7 @@ class MusicBot(discord.Client):
 
         if newmsg:
             if self.config.dm_nowplaying and author:
-                await self.safe_send_message(author, newmsg)
+                return Response(author, newmsg, delate_after=30)
                 return
 
             if self.config.no_nowplaying_auto and not author:
@@ -1127,8 +1127,13 @@ class MusicBot(discord.Client):
         return e
 
     async def cmd_ping(self, channel):
-        """Basic ping command for latency."""
-        return Response(":ping_pong:\n{} ms".format(math.floor(bot.latency * 1000)))
+        """
+        Usage:
+            {command_prefix}ping
+
+        Returns the bots latency.
+        """
+        return Response(":ping_pong:\nIt took me {}ms to communicate with the API.".format(math.floor(self.latency * 1000)))
 
     async def cmd_resetplaylist(self, player, channel):
         """
