@@ -821,7 +821,7 @@ class MusicBot(discord.Client):
 
         try:
             if content is not None or allow_none:
-                if self.config.embeds:
+                if if isinstance(content, discord.Embed)::
                     msg = await dest.send(embed=content)
                 else:
                     msg = await dest.send(content, tts=tts)
