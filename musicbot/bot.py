@@ -491,7 +491,7 @@ class MusicBot(discord.Client):
 
         if newmsg:
             if self.config.dm_nowplaying and author:
-                return Response(author, newmsg, delate_after=30)
+                return Response(author, newmsg, delete_after=30)
                 return
 
             if self.config.no_nowplaying_auto and not author:
