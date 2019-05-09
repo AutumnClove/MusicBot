@@ -821,7 +821,7 @@ class MusicBot(discord.Client):
 
         try:
             if content is not None or allow_none:
-                if isinstance(content, discord.Embed):
+                if self.config.embeds:
                     msg = await dest.send(embed=content)
                 else:
                     msg = await dest.send(content, tts=tts)
@@ -2093,7 +2093,7 @@ class MusicBot(discord.Client):
                     url=player.current_entry.url
                 )
 
-            self.server_specific_data[guild]['last_np_msg'] = return Response(channel, np_text, delete_after=60)
+            self.server_specific_data[guild]['last_np_msg'] = await self.safe_send_message(channel, np_text, expire_in=30)
             await self._manual_delete_check(message)
         else:
             return Response(
