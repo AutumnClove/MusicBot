@@ -2093,7 +2093,7 @@ class MusicBot(discord.Client):
                     url=player.current_entry.url
                 )
 
-            self.server_specific_data[guild]['last_np_msg'] = await self.safe_send_message(channel, np_text)
+            self.server_specific_data[guild]['last_np_msg'] = return Response(channel, np_text, delete_after=60)
             await self._manual_delete_check(message)
         else:
             return Response(
