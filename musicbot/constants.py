@@ -1,6 +1,6 @@
 import os.path
 
-MAIN_VERSION = 'release-050519'
+MAIN_VERSION = 'release-100519'
 SUB_VERSION = ''
 VERSION = MAIN_VERSION + SUB_VERSION
 
