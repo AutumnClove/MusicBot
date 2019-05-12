@@ -507,6 +507,10 @@ class MusicBot(discord.Client):
                         channel = potential_channel
                         break
 
+            if self.config.embeds:
+                content = self._gen_embed()
+                content.add_field(name='** **', value='{}'.format(np_text), inline=True)
+
             if channel:
                 pass
             elif not channel and last_np_msg:
@@ -516,7 +520,7 @@ class MusicBot(discord.Client):
                 return
 
             # send it in specified channel
-            self.server_specific_data[guild]['last_np_msg'] = await self.safe_send_message(channel, newmsg)
+            self.server_specific_data[guild]['last_np_msg'] = await self.safe_send_message(channel, content if self.config.embeds else newmsg)
 
         # TODO: Check channel voice state?
 
@@ -2105,7 +2109,12 @@ class MusicBot(discord.Client):
                     url=player.current_entry.url
                 )
 
-            self.server_specific_data[guild]['last_np_msg'] = await self.safe_send_message(channel, np_text, expire_in=30)
+            if self.config.embeds:
+                content = self._gen_embed()
+                content.add_field(name='** **', value='{}'.format(np_text), inline=True)
+
+
+            self.server_specific_data[guild]['last_np_msg'] = await self.safe_send_message(channel, content if self.config.embeds else np_text, expire_in=30)
             await self._manual_delete_check(message)
         else:
             return Response(
@@ -2841,7 +2850,7 @@ class MusicBot(discord.Client):
         code = data.strip('` \n')
 
         scope = globals().copy()
-        scope.update({'self': self})
+        scope.update({'self': self, 'message': message, 'author': message.author})
 
         try:
             result = eval(code, scope)
@@ -2855,7 +2864,7 @@ class MusicBot(discord.Client):
         if asyncio.iscoroutine(result):
             result = await result
 
-        return Response(codeblock.format(result))
+        return Response(":inbox_tray::\n" + codeblock.format(code) + ":outbox_tray::\n" + codeblock.format(result))
 
     async def on_message(self, message):
         await self.wait_until_ready()
