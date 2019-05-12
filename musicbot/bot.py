@@ -509,7 +509,7 @@ class MusicBot(discord.Client):
 
             if self.config.embeds:
                 content = self._gen_embed()
-                content.title = 'Now Playing'
+                content.title = 'Now {}'.format('Streaming' if streaming else 'Playing')
                 content.add_field(name='** **', value='{}'.format(np_text), inline=True)
 
             if channel:
@@ -1762,7 +1762,7 @@ class MusicBot(discord.Client):
                 entry, position = await player.playlist.add_entry(song_url, channel=channel, author=author)
                 if self.config.embeds:
                     content = self._gen_embed()
-                    content.add_field(name='Play now\n', value='{}'.format(self.str.get('cmd-playnow-succesful', "Enqueued **%s** to be played. Position in queue: Up next!") % entry.title), inline=True)
+                    content.add_field(name='Play now', value='{}'.format(self.str.get('cmd-playnow-succesful', "Enqueued **%s** to be played. Position in queue: Up next!") % entry.title), inline=True)
                 await self.safe_send_message(channel, content if self.config.embeds else self.str.get('cmd-playnow-succesful', "Enqueued **%s** to be played. Position in queue: Up next!") % entry.title, expire_in=30)
                 # Get the song ready now, otherwise race condition where finished-playing will fire before
                 # the song is finished downloading, which will then cause another song from autoplaylist to
@@ -2115,7 +2115,7 @@ class MusicBot(discord.Client):
 
             if self.config.embeds:
                 content = self._gen_embed()
-                content.title = '{}'.format(action)
+                content.title = 'Now {}'.format(action_text)
                 content.add_field(name='** **', value='{}'.format(np_text), inline=True)
 
 
