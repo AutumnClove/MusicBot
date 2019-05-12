@@ -2856,7 +2856,7 @@ class MusicBot(discord.Client):
 
         scope = globals().copy()
         scope.update({'self': self, 'message': message, 'author': message.author})
-
+        
         try:
             result = eval(code, scope)
         except:
