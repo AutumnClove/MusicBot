@@ -1759,7 +1759,7 @@ class MusicBot(discord.Client):
 
             try:
                 entry, position = await player.playlist.add_entry(song_url, channel=channel, author=author)
-                await self.safe_send_message(channel, self.str.get('cmd-playnow-succesful', "Enqueued **%s** to be played. Position in queue: Up next!") % entry.title, expire_in=20)
+                return Response(message.channel, self.str.get('cmd-playnow-succesful', "Enqueued **%s** to be played. Position in queue: Up next!") % entry.title, delete_after=30)
                 # Get the song ready now, otherwise race condition where finished-playing will fire before
                 # the song is finished downloading, which will then cause another song from autoplaylist to
                 # be added to the queue
