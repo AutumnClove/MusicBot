@@ -1687,7 +1687,7 @@ class MusicBot(discord.Client):
 
         return Response(reply_text, delete_after=30)
 
-    async def cmd_playnow(self, player, channel, author, permissions, leftover_args, song_url):
+    async def cmd_playnow(self, player, message, channel, author, permissions, leftover_args, song_url):
         """
         Usage:
             {command_prefix}playnow song_link
