@@ -2115,7 +2115,7 @@ class MusicBot(discord.Client):
 
             if self.config.embeds:
                 content = self._gen_embed()
-                content.title = 'np'.format(action_text)
+                content.title = 'np'
                 content.add_field(name='** **', value='{}'.format(np_text), inline=True)
 
 
