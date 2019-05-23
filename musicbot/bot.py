@@ -1131,6 +1131,49 @@ class MusicBot(discord.Client):
         e.set_author(name=self.user.name, url='https://github.com/Just-Some-Bots/MusicBot', icon_url=self.user.avatar_url)
         return e
 
+    async def cmd_pull(self, channel, message, server):
+        """
+        Usage:
+            {command_prefix}pull pr#
+
+        Reference a pull request from GitHub©.
+        """
+        pr_number = message.content.strip("{}".format(self.config.command_prefix) + "pull")
+        pr = "https://github.com/Just-Some-Bots/MusicBot/pull/{pr_number}"
+        if message.guild.id == int('129489631539494912'):
+            return Response(pr, reply=False, delete_after=300)
+        else:
+            raise exceptions.PermissionsError("This command can only be used in the `Rhino Bot Help` server.", expire_in=30)
+
+    async def cmd_using(self, channel, message, server):
+        """
+        Usage:
+            {command_prefix}using guide_part
+
+        Reference a part of the guide about using the bot.
+        """
+        guide_part = message.content.strip("{}".format(self.config.command_prefix) + "using")
+        using = "https://just-some-bots.github.io/MusicBot/using/" + guide_part
+        if message.guild.id == int('129489631539494912'):
+            return Response(using, reply=False, delete_after=300)
+        else:
+            raise exceptions.PermissionsError("This command can only be used in the `Rhino Bot Help` server.", expire_in=30)
+
+    async def cmd_installing(self, channel, message, server):
+        """
+        Usage:
+            {command_prefix}using guide_part
+
+        Reference a os install guide.
+        """
+        os = message.content.strip("{}".format(self.config.command_prefix) + "installing")
+        os_guide = "https://just-some-bots.github.io/MusicBot/installing/" + os
+        if message.guild.id == int('129489631539494912'):
+            return Response(os_guide, reply=False, delete_after=300)
+        else:
+            raise exceptions.PermissionsError("This command can only be used in the `Rhino Bot Help` server.", expire_in=30)
+
+
     async def cmd_ping(self, channel):
         """
         Usage:
