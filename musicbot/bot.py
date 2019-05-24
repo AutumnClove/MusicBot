@@ -1131,43 +1131,54 @@ class MusicBot(discord.Client):
         e.set_author(name=self.user.name, url='https://github.com/Just-Some-Bots/MusicBot', icon_url=self.user.avatar_url)
         return e
 
-    async def cmd_pull(self, channel, message, server):
+    async def cmd_pull(self, message, pr_number=None):
         """
         Usage:
             {command_prefix}pull pr#
 
         Reference a pull request from GitHub©.
         """
-        pr_number = message.content.strip("{}".format(self.config.command_prefix) + "pull")
-        pr = "https://github.com/Just-Some-Bots/MusicBot/pull/{pr_number}"
-        if message.guild.id == int('129489631539494912'):
-            return Response(pr, reply=False, delete_after=300)
+        if not pr_number:
+            raise exceptions.CommandError("Please provide a pull request to reference", expire_in=30)
         else:
-            raise exceptions.PermissionsError("This command can only be used in the `Rhino Bot Help` server.", expire_in=30)
+            pr = "https://github.com/Just-Some-Bots/MusicBot/pull/" + str(pr_number)
+            content = self._gen_embed()
+            content.title = 'Pull Request'
+            content.add_field(name='** **', value=pr, inline=True)
+            if message.guild.id == int('129489631539494912'):
+                return Response(pr, reply=False, delete_after=300)
+            else:
+                raise exceptions.PermissionsError("This command can only be used in the `Rhino Bot Help` server.", expire_in=30)
 
-    async def cmd_using(self, channel, message, server):
+    async def cmd_using(self, message, guide_part=None):
         """
         Usage:
             {command_prefix}using guide_part
 
         Reference a part of the guide about using the bot.
         """
-        guide_part = message.content.strip("{}".format(self.config.command_prefix) + "using")
-        using = "https://just-some-bots.github.io/MusicBot/using/" + guide_part
+        if not guide_part:
+            raise exceptions.CommandError("Please provide a valid guide using section")
+        else:
+            using = "https://just-some-bots.github.io/MusicBot/using/" + str(guide_part)
         if message.guild.id == int('129489631539494912'):
             return Response(using, reply=False, delete_after=300)
         else:
             raise exceptions.PermissionsError("This command can only be used in the `Rhino Bot Help` server.", expire_in=30)
 
-    async def cmd_installing(self, channel, message, server):
+    async def cmd_installing(self, message, os=None):
         """
         Usage:
             {command_prefix}using guide_part
 
         Reference a os install guide.
         """
-        os = message.content.strip("{}".format(self.config.command_prefix) + "installing")
-        os_guide = "https://just-some-bots.github.io/MusicBot/installing/" + os
+        #os.lower()
+        if not os:
+            raise exceptions.CommandError("Please provide a valid os guide")
+        else:
+            #if not os in ['Windows']
+            os_guide = "https://just-some-bots.github.io/MusicBot/installing/" + str(os)
         if message.guild.id == int('129489631539494912'):
             return Response(os_guide, reply=False, delete_after=300)
         else:
@@ -1300,18 +1311,66 @@ class MusicBot(discord.Client):
                     reply=True, delete_after=10
                 )
 
-    async def cmd_id(self, author, user_mentions):
+    async def cmd_userinfo(self, author, server, channel, message, user_mentions):
         """
         Usage:
-            {command_prefix}id [@user]
-
-        Tells the user their id or the id of another user.
+            {command_prefix}userinfo [@user]
+        Provides some info on a user, if no-one mentioned returns info on message author.
         """
         if not user_mentions:
-            return Response(self.str.get('cmd-id-self', 'Your ID is `{0}`').format(author.id), reply=True, delete_after=35)
+            stripped = len(self.config.command_prefix)+9
+            int(stripped)
+            ph = message.content[stripped:]
+            str(ph)
+            member = server.get_member_named(ph)
+            if member == None:
+                member = message.author
         else:
-            usr = user_mentions[0]
-            return Response(self.str.get('cmd-id-other', '**{0}**s ID is `{1}`').format(usr.name, usr.id), reply=True, delete_after=35)
+            member = user_mentions[0]
+
+        voice = member.voice
+        roles = ', '.join(r.name for r in member.roles)
+        join_date = member.joined_at.strftime("%d/%m/%Y %H:%M")
+        status = member.status
+        game = member.game
+        server = member.server.name
+        nickname = member.nick
+        color = member.colour
+        top_role = member.top_role
+        creation_date = member.created_at.strftime("%d/%m/%Y %H:%M")
+        avatar = member.avatar_url if member.avatar else member.default_avatar_url
+        user_id = member.id
+
+        if self.config.delete_messages:
+            await self.safe_delete_message(message)
+        if self.config.embeds:
+            if nickname == None:
+                e = discord.Embed(title="User info", colour=color, description="information on {} in {}".format(member, server), timestamp=datetime.datetime.utcnow())
+            else:
+                e = discord.Embed(title="User info", colour=color, description="information on {} AKA {} in {}".format(member, nickname, server), timestamp=datetime.datetime.utcnow())
+            e.set_thumbnail(url=avatar)
+            e.set_footer(text='Just-Some-Bots/MusicBot ({})'.format(BOTVERSION), icon_url='https://i.imgur.com/gFHBoZA.png')
+            e.set_author(name=self.user.name, url='https://github.com/Just-Some-Bots/MusicBot', icon_url=self.user.avatar_url)
+            e.add_field(name='Roles', value=roles, inline=False)
+            e.add_field(name='Created on', value=creation_date, inline=True)
+            e.add_field(name='Joined at', value=join_date, inline=True)
+            e.add_field(name='Game', value=game, inline=True)
+            e.add_field(name='Status', value=status, inline=True)
+            e.add_field(name='Top role', value=top_role, inline=True)
+            e.add_field(name='Voice', value=voice, inline=True)
+            e.add_field(name='User ID', value=user_id, inline=True)
+            await self.send_message(message.channel, embed=e)
+
+        else:
+            if nickname == None:
+                return Response(
+                    self.str.get('cmd-userinfo-nonick', """
+```Nim\nInformation on {} in {}\nRoles: {}\nCreated on: {}\nJoined at: {}\nGame: {}\nStatus: {}\nTop role: {}\nColor: {}\nVoice: {}\nUser ID: {}\nAvatar```\n{}""").format(member.name, server, roles, creation_date, join_date, game, status, top_role, color, voice, user_id, avatar))
+            else:
+                return Response(self.str.get('cmd-userinfo-nick', """
+```Nim\nInformation on {} AKA {} in {}\nRoles: {}\nCreated on: {}\nJoined at: {}\nGame:{}\nStatus: {}\nTop role: {}\nColor:{}\nVoice: {}\nUser ID: {}\nAvatar```\n{}""").format(member.name, nickname, server, roles, creation_date, join_date, game, status, top_role, color, voice, user_id, avatar))
+
+
 
     async def cmd_save(self, player, url=None):
         """
@@ -2913,6 +2972,199 @@ class MusicBot(discord.Client):
             result = await result
 
         return Response(":inbox_tray::\n" + codeblock.format(code) + ":outbox_tray::\n" + codeblock.format(result))
+
+    async def on_message_edit(self, before:discord.Message.content, after:discord.Message.content):
+        await self.wait_until_ready()
+        message = after
+
+        message_content = message.content.strip()
+        if not message_content.startswith(self.config.command_prefix):
+            return
+
+        if message.author == self.user:
+            log.warning("Ignoring command from myself ({})".format(message.content))
+            return
+
+        if self.config.bound_channels and message.channel.id not in self.config.bound_channels and not message.channel.is_private:
+            return  # if I want to log this I just move it under the prefix check
+
+        command, *args = message_content.split(' ')  # Uh, doesn't this break prefixes with spaces in them (it doesn't, config parser already breaks them)
+        command = command[len(self.config.command_prefix):].lower().strip()
+
+        handler = getattr(self, 'cmd_' + command, None)
+        if not handler:
+            return
+
+        if message.channel.is_private:
+            if not (message.author.id == self.config.owner_id and command == 'joinserver'):
+                await self.send_message(message.channel, 'You cannot use this bot in private messages.')
+                return
+
+        if message.author.id in self.blacklist and message.author.id != self.config.owner_id:
+            log.warning("User blacklisted: {0.id}/{0!s} ({1})".format(message.author, command))
+            return
+
+        else:
+            log.info("{0.id}/{0!s}: {1}".format(message.author, message_content.replace('\n', '\n... ')))
+
+        user_permissions = self.permissions.for_user(message.author)
+
+        argspec = inspect.signature(handler)
+        params = argspec.parameters.copy()
+
+        sentmsg = response = None
+
+        # noinspection PyBroadException
+        try:
+            if user_permissions.ignore_non_voice and command in user_permissions.ignore_non_voice:
+                await self._check_ignore_non_voice(message)
+
+            handler_kwargs = {}
+            if params.pop('message', None):
+                handler_kwargs['message'] = message
+
+            if params.pop('channel', None):
+                handler_kwargs['channel'] = message.channel
+
+            if params.pop('author', None):
+                handler_kwargs['author'] = message.author
+
+            if params.pop('server', None):
+                handler_kwargs['server'] = message.server
+
+            if params.pop('player', None):
+                handler_kwargs['player'] = await self.get_player(message.channel)
+
+            if params.pop('_player', None):
+                handler_kwargs['_player'] = self.get_player_in(message.server)
+
+            if params.pop('permissions', None):
+                handler_kwargs['permissions'] = user_permissions
+
+            if params.pop('user_mentions', None):
+                handler_kwargs['user_mentions'] = list(map(message.server.get_member, message.raw_mentions))
+
+            if params.pop('channel_mentions', None):
+                handler_kwargs['channel_mentions'] = list(map(message.server.get_channel, message.raw_channel_mentions))
+
+            if params.pop('voice_channel', None):
+                handler_kwargs['voice_channel'] = message.server.me.voice_channel
+
+            if params.pop('leftover_args', None):
+                handler_kwargs['leftover_args'] = args
+
+            args_expected = []
+            for key, param in list(params.items()):
+
+                # parse (*args) as a list of args
+                if param.kind == param.VAR_POSITIONAL:
+                    handler_kwargs[key] = args
+                    params.pop(key)
+                    continue
+
+                # parse (*, args) as args rejoined as a string
+                # multiple of these arguments will have the same value
+                if param.kind == param.KEYWORD_ONLY and param.default == param.empty:
+                    handler_kwargs[key] = ' '.join(args)
+                    params.pop(key)
+                    continue
+
+                doc_key = '[{}={}]'.format(key, param.default) if param.default is not param.empty else key
+                args_expected.append(doc_key)
+
+                # Ignore keyword args with default values when the command had no arguments
+                if not args and param.default is not param.empty:
+                    params.pop(key)
+                    continue
+
+                # Assign given values to positional arguments
+                if args:
+                    arg_value = args.pop(0)
+                    handler_kwargs[key] = arg_value
+                    params.pop(key)
+
+            if message.author.id != self.config.owner_id:
+                if user_permissions.command_whitelist and command not in user_permissions.command_whitelist:
+                    raise exceptions.PermissionsError(
+                        "This command is not enabled for your group ({}).".format(user_permissions.name),
+                        expire_in=20)
+
+                elif user_permissions.command_blacklist and command in user_permissions.command_blacklist:
+                    raise exceptions.PermissionsError(
+                        "This command is disabled for your group ({}).".format(user_permissions.name),
+                        expire_in=20)
+
+            # Invalid usage, return docstring
+            if params:
+                docs = getattr(handler, '__doc__', None)
+                if not docs:
+                    docs = 'Usage: {}{} {}'.format(
+                        self.config.command_prefix,
+                        command,
+                        ' '.join(args_expected)
+                    )
+
+                docs = dedent(docs)
+                await self.safe_send_message(
+                    message.channel,
+                    '```\n{}\n```'.format(docs.format(command_prefix=self.config.command_prefix)),
+                    expire_in=60
+                )
+                return
+
+            response = await handler(**handler_kwargs)
+            if response and isinstance(response, Response):
+                if not isinstance(response.content, discord.Embed) and self.config.embeds:
+                    content = self._gen_embed()
+                    content.title = command
+                    content.description = response.content
+                else:
+                    content = response.content
+
+                if response.reply:
+                    if isinstance(content, discord.Embed):
+                        content.description = '{} {}'.format(message.author.mention, content.description if content.description is not discord.Embed.Empty else '')
+                    else:
+                        content = '{}: {}'.format(message.author.mention, content)
+
+                sentmsg = await self.safe_send_message(
+                    message.channel, content,
+                    expire_in=response.delete_after if self.config.delete_messages else 0,
+                    also_delete=message if self.config.delete_invoking else None
+                )
+
+        except (exceptions.CommandError, exceptions.HelpfulError, exceptions.ExtractionError) as e:
+            log.error("Error in {0}: {1.__class__.__name__}: {1.message}".format(command, e), exc_info=True)
+
+            expirein = e.expire_in if self.config.delete_messages else None
+            alsodelete = message if self.config.delete_invoking else None
+
+            if self.config.embeds:
+                content = self._gen_embed()
+                content.add_field(name='Error', value=e.message, inline=False)
+                content.colour = 13369344
+            else:
+                content = '```\n{}\n```'.format(e.message)
+
+            await self.safe_send_message(
+                message.channel,
+                content,
+                expire_in=expirein,
+                also_delete=alsodelete
+            )
+
+        except exceptions.Signal:
+            raise
+
+        except Exception:
+            log.error("Exception in on_message", exc_info=True)
+            if self.config.debug_mode:
+                await self.safe_send_message(message.channel, '```\n{}\n```'.format(traceback.format_exc()))
+
+        finally:
+            if not sentmsg and not response and self.config.delete_invoking:
+                await asyncio.sleep(5)
+                await self.safe_delete_message(message, quiet=True)
 
     async def on_message(self, message):
         await self.wait_until_ready()
