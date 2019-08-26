@@ -43,6 +43,7 @@ from .constants import VERSION as BOTVERSION
 from .constants import DISCORD_MSG_CHAR_LIMIT, AUDIO_CACHE_PATH
 from typing import Optional
 
+
 load_opus_lib()
 
 log = logging.getLogger(__name__)
@@ -490,6 +491,13 @@ class MusicBot(discord.Client):
                 entry.title, player.voice_client.channel.name)
 
         if newmsg:
+            if self.config.dm_nowplaying and author:
+                await self.safe_send_message(author, newmsg)
+                return
+
+            if self.config.no_nowplaying_auto and not author:
+                return
+
             guild = player.voice_client.guild
             last_np_msg = self.server_specific_data[guild]['last_np_msg']
 
@@ -2618,24 +2626,37 @@ class MusicBot(discord.Client):
         return Response("Sent a message with a list of IDs.", delete_after=20)
 
 
-    async def cmd_perms(self, author, user_mentions, channel, guild, permissions):
+    async def cmd_perms(self, author, user_mentions, channel, guild, message, permissions, target=None):
         """
         Usage:
             {command_prefix}perms [@user]
-
         Sends the user a list of their permissions, or the permissions of the user specified.
         """
 
-        lines = ['Command permissions in %s\n' % guild.name, '```', '```']
-
         if user_mentions:
             user = user_mentions[0]
-            permissions = self.permissions.for_user(user)
+            
+        if not user_mentions and not target:
+            user = author
+            
+        if not user_mentions and target:
+            user = guild.get_member_named(target)
+            if user == None:
+                try:
+                    user = await self.fetch_user(target)
+                except discord.NotFound:
+                    return Response("Invalid user ID or server nickname, please double check all typing and try again.", reply=False, delete_after=30)
+
+        permissions = self.permissions.for_user(user)    
+                    
+        if user == author:
+            lines = ['Command permissions in %s\n' % guild.name, '```', '```']
+        else:
+            lines = ['Command permissions for {} in {}\n'.format(user.name, guild.name), '```', '```']
 
         for perm in permissions.__dict__:
             if perm in ['user_list'] or permissions.__dict__[perm] == set():
                 continue
-
             lines.insert(len(lines) - 1, "%s: %s" % (perm, permissions.__dict__[perm]))
 
         await self.safe_send_message(author, '\n'.join(lines))
@@ -2822,11 +2843,14 @@ class MusicBot(discord.Client):
 
         code = data.strip('` \n')
 
+        scope = globals().copy()
+        scope.update({'self': self})
+
         try:
-            result = eval(code)
+            result = eval(code, scope)
         except:
             try:
-                exec(code)
+                exec(code, scope)
             except Exception as e:
                 traceback.print_exc(chain=False)
                 return Response("{}: {}".format(type(e).__name__, e))
@@ -2847,13 +2871,9 @@ class MusicBot(discord.Client):
             log.warning("Ignoring command from myself ({})".format(message.content))
             return
 
-        if self.config.bound_channels and message.channel.id not in self.config.bound_channels:
-            if self.config.unbound_servers:
-                for channel in message.guild.channels:
-                    if channel.id in self.config.bound_channels:
-                        return
-            else:
-                return  # if I want to log this I just move it under the prefix check
+        if message.author.bot and message.author.id not in self.config.bot_exception_ids:
+            log.warning("Ignoring command from other bot ({})".format(message.content))
+            return
 
         if (not isinstance(message.channel, discord.abc.GuildChannel)) and (not isinstance(message.channel, discord.abc.PrivateChannel)):
             return
@@ -2882,6 +2902,14 @@ class MusicBot(discord.Client):
             if not (message.author.id == self.config.owner_id and command == 'joinserver' or command == 'help'):
                 await self.safe_send_message(message.channel, 'You cannot use this bot in private messages.')
                 return
+
+        if self.config.bound_channels and message.channel.id not in self.config.bound_channels:
+            if self.config.unbound_servers:
+                for channel in message.guild.channels:
+                    if channel.id in self.config.bound_channels:
+                        return
+            else:
+                return  # if I want to log this I just move it under the prefix check
 
         if message.author.id in self.blacklist and message.author.id != self.config.owner_id:
             log.warning("User blacklisted: {0.id}/{0!s} ({1})".format(message.author, command))
